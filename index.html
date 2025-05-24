@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Resilience Navigator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - ToR Background/Objectives (Homepage, About): Goal: Inform. Presentation: Text. Interaction: None. Library: HTML.
+        - Annex 1 Guiding Questions (Pathway): Goal: Guide, Organize. Presentation: Interactive visual map/nodes. Interaction: Click to reveal content. Library: HTML, JS.
+        - Annex 1 Tools (Tool Hub, Pathway Content): Goal: Inform, Provide Access. Presentation: Cards, list. Interaction: Search, filter, click for details. Library: HTML, JS.
+        - CoCHAP Learnings (CoCHAP Section): Goal: Share Knowledge. Presentation: Text, case study summaries. Interaction: Expand/collapse. Library: HTML, JS.
+        - Evaluation Criteria Table (About Section): Goal: Inform. Presentation: HTML Table. Interaction: None. Library: HTML.
+        - Other ToR content (consultancy scope, deliverables - in "About"): Goal: Contextual Info. Presentation: Text. Interaction: None. Library: HTML.
+        - Justification: This approach makes the ToR's content actionable and explorable, focusing on the solution (the platform) rather than just the request document.
+    -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .pathway-node { cursor: pointer; transition: transform 0.2s ease-in-out; }
+        .pathway-node:hover { transform: scale(1.05); }
+        .tool-card { transition: box-shadow 0.3s ease-in-out; }
+        .tool-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .nav-link.active {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+        }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            max-height: 80vh;
+        }
+         /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <header class="bg-sky-700 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Urban Resilience Navigator</h1>
+            <nav>
+                <button data-target="home" class="nav-link px-3 py-2 rounded-md hover:bg-sky-600 transition-colors active">Home</button>
+                <button data-target="pathway" class="nav-link px-3 py-2 rounded-md hover:bg-sky-600 transition-colors">Resilience Pathway</button>
+                <button data-target="toolHub" class="nav-link px-3 py-2 rounded-md hover:bg-sky-600 transition-colors">Tool & Resource Hub</button>
+                <button data-target="cochapLearnings" class="nav-link px-3 py-2 rounded-md hover:bg-sky-600 transition-colors">CoCHAP Learnings</button>
+                <button data-target="about" class="nav-link px-3 py-2 rounded-md hover:bg-sky-600 transition-colors">About this Initiative</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="home" class="content-section active">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-semibold text-sky-700 mb-4">Welcome to the Urban Resilience Navigator</h2>
+                <p class="mb-4 text-lg">This platform is a conceptual guide designed to help Red Cross Red Crescent National Societies and partners navigate the complexities of urban resilience programming. It embodies the vision of a curated, non-linear process connecting essential tools, resources, and learnings.</p>
+                <p class="mb-4">By 2050, two-thirds of the world's population will live in urban areas, with significant growth in vulnerable regions. Cities face increasing risks from climate change, such as floods and heatwaves, compounding existing environmental, societal, and economic challenges. This platform aims to empower you to design and implement impactful urban resilience projects.</p>
+                <div class="mt-6 p-4 bg-sky-50 border border-sky-200 rounded-md">
+                    <h3 class="text-xl font-semibold text-sky-700 mb-2">How to Use This Platform:</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Explore the <button class="text-sky-600 hover:underline font-semibold" onclick="navigateTo('pathway')">Resilience Pathway</button> to understand the key stages and guiding questions in urban programming.</li>
+                        <li>Discover relevant tools and documents in the <button class="text-sky-600 hover:underline font-semibold" onclick="navigateTo('toolHub')">Tool & Resource Hub</button>.</li>
+                        <li>Learn from the experiences of the CoCHAP project in the <button class="text-sky-600 hover:underline font-semibold" onclick="navigateTo('cochapLearnings')">CoCHAP Learnings</button> section.</li>
+                        <li>Understand the background of this initiative under <button class="text-sky-600 hover:underline font-semibold" onclick="navigateTo('about')">About this Initiative</button>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="pathway" class="content-section">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-semibold text-sky-700 mb-2">Urban Resilience Pathway</h2>
+                <p class="mb-6 text-lg">This interactive pathway helps you navigate the urban resilience programming process. It's structured around key guiding questions. Click on a question to explore relevant information, tools, and considerations. This non-linear approach allows you to find what you need based on your context and current stage.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="pathwayNodesContainer">
+                    </div>
+            </div>
+        </section>
+
+        <section id="toolHub" class="content-section">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-semibold text-sky-700 mb-2">Tool & Resource Hub</h2>
+                <p class="mb-6 text-lg">Discover a curated collection of tools, guides, and resources to support your urban resilience initiatives. Use the search and filters to find what you need. Each entry provides a brief overview and, where available, links to access the material.</p>
+                <div class="mb-6">
+                    <input type="text" id="toolSearchInput" placeholder="Search tools and resources..." class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-shadow">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="toolCardsContainer">
+                    </div>
+            </div>
+        </section>
+
+        <section id="cochapLearnings" class="content-section">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-semibold text-sky-700 mb-2">CoCHAP Learnings & Case Studies</h2>
+                <p class="mb-6 text-lg">This section captures key learnings from the Coastal City Resilience and Extreme Heat Action Project (CoCHAP). It highlights adaptations, enhancements, and innovative approaches from National Societies in Tanzania, Honduras, Bangladesh, and Indonesia. These insights aim to inform and inspire your urban resilience programming.</p>
+                
+                <div id="cochapAccordionContainer" class="space-y-4">
+                    <div class="border border-slate-200 rounded-lg">
+                        <button class="w-full p-4 text-left bg-slate-50 hover:bg-slate-100 rounded-t-lg focus:outline-none accordion-toggle">
+                            <h3 class="text-xl font-semibold text-sky-600">Enhanced City-Wide Risk Assessments (CWRA)</h3>
+                        </button>
+                        <div class="p-4 border-t border-slate-200 accordion-content hidden">
+                            <p class="mb-2">National Societies in CoCHAP strengthened CWRAs by integrating enhanced Vulnerability and Capacity Assessments (EVCA) in high-risk communities. This involved:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li>Conducting detailed EVCAs focusing on specific urban vulnerabilities.</li>
+                                <li>Creating digital base maps through OpenStreetMap (OSM) for better spatial understanding.</li>
+                                <li>Integrating heat risk perception and impact studies into the assessment process.</li>
+                                <li>Developing city heat action plans based on these comprehensive assessments.</li>
+                            </ul>
+                            <p class="mt-3 italic"><strong>Relevance:</strong> This demonstrates the value of combining city-level analysis with deep dives into community-specific vulnerabilities, especially for climate-related risks like heatwaves.</p>
+                        </div>
+                    </div>
+                    <div class="border border-slate-200 rounded-lg">
+                        <button class="w-full p-4 text-left bg-slate-50 hover:bg-slate-100 rounded-t-lg focus:outline-none accordion-toggle">
+                            <h3 class="text-xl font-semibold text-sky-600">Coalition Building & Co-designing Solutions</h3>
+                        </button>
+                        <div class="p-4 border-t border-slate-200 accordion-content hidden">
+                            <p class="mb-2">A key aspect of CoCHAP was fostering collaboration and co-design. This involved:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li>Utilizing tools like the Stakeholder Mapping and Coalition Building Toolkit to identify and engage relevant city actors.</li>
+                                <li>Employing the Co-designing Solutions Toolkit to work collaboratively with communities and stakeholders to develop contextually appropriate interventions.</li>
+                                <li>Implementing matching grants to support the execution of these co-designed solutions.</li>
+                            </ul>
+                            <p class="mt-3 italic"><strong>Relevance:</strong> Effective urban resilience requires multi-stakeholder collaboration. Co-design ensures that solutions are owned by the community and address their actual needs.</p>
+                        </div>
+                    </div>
+                     <div class="border border-slate-200 rounded-lg">
+                        <button class="w-full p-4 text-left bg-slate-50 hover:bg-slate-100 rounded-t-lg focus:outline-none accordion-toggle">
+                            <h3 class="text-xl font-semibold text-sky-600">Adapting Tools to Urban Contexts</h3>
+                        </button>
+                        <div class="p-4 border-t border-slate-200 accordion-content hidden">
+                            <p class="mb-2">The ToR highlights that many existing tools can be applied to urban contexts with some adaptation. CoCHAP likely involved:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li>Reviewing tools like the Urban Resilience Toolkit (URT), City Heatwave Guide, and Urban Action Kit for applicability.</li>
+                                <li>Contextualizing methodologies for specific urban settings, considering population density, infrastructure complexities, and diverse stakeholder landscapes.</li>
+                                <li>Documenting these adaptations to inform future guidance and tool revisions.</li>
+                            </ul>
+                            <p class="mt-3 italic"><strong>Relevance:</strong> This underscores the need for flexibility and contextualization when applying general resilience tools to unique urban environments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="content-section">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-semibold text-sky-700 mb-4">About this Initiative</h2>
+                <p class="mb-4 text-lg">This platform is inspired by the "Call for Proposals for Consultancy Services for Curating Urban Resilience Process and Tools" by the American Red Cross on behalf of the IFRC. It aims to conceptualize a solution to the challenges faced by RCRC National Societies in designing and implementing effective urban resilience programs.</p>
+
+                <div class="mt-6 mb-8 p-4 bg-sky-50 border border-sky-200 rounded-md">
+                    <h3 class="text-xl font-semibold text-sky-700 mb-2">Core Challenge:</h3>
+                    <p>National Societies find it difficult to identify the right information and tools that match their knowledge, capacity, and expertise for urban contexts. Many also require external technical assistance due to the complexity of urban risks and settings. There's a need to connect existing tools and fill gaps coherently.</p>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-sky-600 mb-3">Key Objectives (from the ToR):</h3>
+                <ul class="list-disc list-inside space-y-2 mb-6">
+                    <li>Capture learning from the CoCHAP project (city/community risk analysis, prioritization, coalitions, co-design, matching grants).</li>
+                    <li>Develop a non-linear process for NSs fitting their resources and context.</li>
+                    <li>Design, develop, and test this process connecting existing tools user-friendly.</li>
+                    <li>Place relevant content with links using existing tools.</li>
+                    <li>Edit and redesign the Urban Resilience Toolkit (URT) per IFRC guidelines.</li>
+                    <li>Develop guidance (document/tool) for users to navigate the process efficiently.</li>
+                    <li>Develop recommendations for updating existing tools or creating new ones.</li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold text-sky-600 mb-3">Target Audience:</h3>
+                <p class="mb-4">Primarily RCRC National Societies, but also other community-based organizations, local governments, community leaders, and city stakeholders interested in urban resilience building.</p>
+
+                <h3 class="text-2xl font-semibold text-sky-600 mb-3">Evaluation Criteria for Consultancy (Illustrative Table from ToR):</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 border border-slate-300 rounded-lg">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Competencies</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Technical</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">80/100</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700 pl-10">Quality of the proposal (approach, methodology, understanding of the task)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">30/80</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700 pl-10">Level of expertise of the team</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">30/80</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700 pl-10">Similar works completed</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">20/80</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Financial</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">20/100</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mt-4 text-sm text-slate-600">This platform is a conceptual demonstration and does not represent the final product of the consultancy described in the ToR.</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="pathwayModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50 opacity-0">
+        <div class="modal-content bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl transform scale-95 transition-transform duration-300 ease-in-out overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-2xl font-semibold text-sky-700">Modal Title</h3>
+                <button id="closeModalButton" class="text-slate-500 hover:text-slate-700 text-2xl">&times;</button>
+            </div>
+            <div id="modalDescription" class="mb-4 text-slate-700">Modal description...</div>
+            <h4 class="text-lg font-semibold text-sky-600 mb-2">Relevant Tools & Resources:</h4>
+            <ul id="modalToolsList" class="list-disc list-inside space-y-1 text-slate-600">
+                </ul>
+             <p id="modalNoTools" class="text-slate-500 italic hidden">No specific tools listed for this question in Annex 1, but general urban programming resources may apply.</p>
+        </div>
+    </div>
+
+
+    <footer class="text-center p-4 text-slate-600 border-t border-slate-200 mt-12">
+        <p>&copy; 2025 Conceptual Urban Resilience Navigator. Inspired by IFRC & American Red Cross initiatives.</p>
+    </footer>
+
+    <script>
+        // Data (extracted/adapted from Annex 1 of the ToR)
+        const pathwayData = [
+            { id: "q1", question: "Why is urban important?", tools: ["IFRC Urban Preparedness videos (in 5 languages)"], description: "Understanding the significance of urban areas in the context of disaster risk and resilience is the first step. This involves recognizing the unique challenges and opportunities presented by urban environments, including high population density, complex infrastructure, and diverse socio-economic dynamics." },
+            { id: "q2", question: "How do I know about urbanization and related risks in my country?", tools: ["World Cities Report 2024", "IPCC Cities and settlements Report", "Coastal Hazards fact sheets.", "GDPC Heat Toolkit", "Conflict and Climate Change handbook"], description: "Gaining a general understanding of urbanization trends and associated risks within your specific national context. This involves researching demographic shifts, common urban hazards (e.g., flooding, heatwaves, earthquakes), and their potential impacts on communities and systems." },
+            { id: "q3", question: "What does the urban programming process entail?", tools: ["A visual bringing all the tools together (needed)"], description: "This question explores the overall framework and lifecycle of urban resilience programming. It involves understanding the typical phases, from initial assessment and planning through to implementation, monitoring, and adaptation. The aim is to develop a coherent, non-linear process map." },
+            { id: "q4", question: "What kind of capacities do I need?", tools: ["PARATUS Stress Testing Guide", "Urban Compass", "Urban Ready Standards for NS branches", "Preparedness for Effective Response (PER) urban considerations", "Multi Hazard Early Warning System Assessment (MHEWSA)"], description: "Identifying the necessary organizational and technical capacities for effective urban programming. This includes skills in urban risk assessment, community engagement in complex settings, multi-stakeholder coordination, project management adapted to urban contexts, and understanding of urban systems." },
+            { id: "q5", question: "What are the training programs available to develop capacities?", tools: ["Adapting to Urban challenges IFRC training", "GRC Mapping of context analysis tools in urban", "Resilience Measurement Dashboard", "Roadmap to Resilience 2"], description: "Exploring available training programs and resources that can help build the required capacities within National Societies. This involves identifying relevant courses, workshops, and learning materials focused on urban resilience, climate change adaptation in cities, and specific technical skills." },
+            { id: "q6", question: "How do I know who and what (which systems) are at risk and vulnerable?", tools: ["GDPC Urban Resilience toolkit (URT)", "Climate Resilience Alliance (ZCRA context)"], description: "This focuses on conducting detailed risk and vulnerability assessments within specific urban areas. It involves identifying vulnerable populations, critical infrastructure, and essential urban systems (e.g., water, sanitation, health, food) that are exposed to various hazards." },
+            { id: "q7", question: "How do I engage with the city actors?", tools: ["Stakeholder Mapping and Coalition Building Toolkit"], description: "Understanding how to effectively engage with a diverse range of city actors, including local government authorities, private sector entities, academic institutions, civil society organizations, and community groups. This is crucial for building coalitions and ensuring collaborative action." },
+            { id: "q8", question: "How do I engage with communities?", tools: ["CEA Toolkit (Community Engagement and Accountability)"], description: "Focuses on methods and approaches for meaningful community engagement and participation in urban settings. This involves ensuring that the voices of vulnerable and marginalized groups are heard and that programming is community-led and accountable." },
+            { id: "q9", question: "What kind of action can I take?", tools: ["Urban Action Kit", "IFRC Humanitarian Opportunities explorer", "CO-designing Solutions Toolkit", "Nature-Based Solutions Toolkit", "GDPC Business Preparedness Kit", "Pandemic Preparedness Kit", "Cooling Centers for Heat Guide", "COCHAP Project examples", "Alert Hub Initiative"], description: "Exploring the range of possible interventions and actions that can be taken to build urban resilience. This includes preparedness measures, response activities, recovery efforts, climate change adaptation projects, and nature-based solutions, tailored to specific urban risks and contexts." },
+            { id: "q10", question: "What are the minimum quality indicators for urban engagement?", tools: ["Core Humanitarian Standards (CHS)"], description: "Defining and adhering to minimum quality standards for urban programming and engagement. This involves ensuring that interventions are principled, accountable, effective, and contribute to long-term resilience, often guided by frameworks like the Core Humanitarian Standards." }
+        ];
+
+        const allTools = [
+            // Extracted from Annex 1 and pathwayData
+            { name: "IFRC Urban Preparedness videos (in 5 languages)", category: "Awareness", description: "Videos explaining the importance of urban preparedness." },
+            { name: "World Cities Report 2024", category: "Assessment", description: "UN-Habitat's flagship report on global urban trends and challenges." },
+            { name: "IPCC Cities and settlements Report", category: "Assessment", description: "IPCC special report on climate change impacts on cities." },
+            { name: "Coastal Hazards fact sheets.", category: "Assessment", description: "Fact sheets detailing risks associated with coastal hazards." },
+            { name: "GDPC Heat Toolkit", category: "Assessment & Action", description: "Toolkit for understanding and addressing heat risks in urban areas." },
+            { name: "Conflict and Climate Change handbook", category: "Assessment", description: "Handbook exploring the intersection of conflict and climate change." },
+            { name: "A visual bringing all the tools together (needed)", category: "Process", description: "Conceptual need for a visual map of urban programming tools." },
+            { name: "PARATUS Stress Testing Guide", category: "Capacity Building", description: "Guide for stress testing resilience capacities." },
+            { name: "Urban Compass", category: "Capacity Building", description: "A tool or framework for navigating urban resilience." },
+            { name: "Urban Ready Standards for NS branches", category: "Capacity Building", description: "Standards for NS branches to enhance urban readiness." },
+            { name: "Preparedness for Effective Response (PER) urban considerations", category: "Capacity Building", description: "Urban-specific considerations for PER framework." },
+            { name: "Multi Hazard Early Warning System Assessment (MHEWSA)", category: "Capacity Building & Assessment", description: "Tool for assessing multi-hazard early warning systems." },
+            { name: "Adapting to Urban challenges IFRC training", category: "Training", description: "IFRC training module on adapting to urban challenges." },
+            { name: "GRC Mapping of context analysis tools in urban", category: "Training & Assessment", description: "German Red Cross mapping of urban context analysis tools." },
+            { name: "Resilience Measurement Dashboard", category: "Training & M&E", description: "Dashboard for measuring and tracking resilience." },
+            { name: "Roadmap to Resilience 2", category: "Training & Process", description: "A roadmap or guide for building resilience." },
+            { name: "GDPC Urban Resilience toolkit (URT)", category: "Assessment & Action", description: "Comprehensive toolkit for urban resilience programming." },
+            { name: "Climate Resilience Alliance (ZCRA context)", category: "Assessment & Action", description: "Initiatives and tools from the Zurich Climate Resilience Alliance." },
+            { name: "Stakeholder Mapping and Coalition Building Toolkit", category: "Engagement", description: "Toolkit for identifying and engaging stakeholders and building coalitions." },
+            { name: "CEA Toolkit (Community Engagement and Accountability)", category: "Engagement", description: "Toolkit for effective community engagement and accountability." },
+            { name: "Urban Action Kit", category: "Action", description: "Kit providing guidance and ideas for urban actions." },
+            { name: "IFRC Humanitarian Opportunities explorer", category: "Action", description: "Platform for exploring humanitarian opportunities." },
+            { name: "CO-designing Solutions Toolkit", category: "Action & Engagement", description: "Toolkit for co-designing solutions with communities." },
+            { name: "Nature-Based Solutions Toolkit", category: "Action", description: "Toolkit for implementing nature-based solutions." },
+            { name: "GDPC Business Preparedness Kit", category: "Action", description: "Kit for enhancing business preparedness in urban areas." },
+            { name: "Pandemic Preparedness Kit", category: "Action", description: "Kit for pandemic preparedness in urban settings." },
+            { name: "Cooling Centers for Heat Guide", category: "Action", description: "Guide for setting up and managing cooling centers during heatwaves." },
+            { name: "COCHAP Project examples", category: "Action & Learning", description: "Examples and learnings from the CoCHAP project." },
+            { name: "Alert Hub Initiative", category: "Action & Early Warning", description: "Initiative focused on alert systems (preparecenter.org link)." },
+            { name: "Core Humanitarian Standards (CHS)", category: "Quality Standards", description: "Standards for quality and accountability in humanitarian action." }
+        ];
+
+        // Navigation
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        function navigateTo(targetId) {
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.target === targetId) {
+                    link.classList.add('active');
+                }
+            });
+            window.scrollTo(0, 0); // Scroll to top on navigation
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                navigateTo(e.target.dataset.target);
+            });
+        });
+        
+        // Pathway Nodes
+        const pathwayNodesContainer = document.getElementById('pathwayNodesContainer');
+        const modal = document.getElementById('pathwayModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalToolsList = document.getElementById('modalToolsList');
+        const modalNoTools = document.getElementById('modalNoTools');
+        const closeModalButton = document.getElementById('closeModalButton');
+
+        pathwayData.forEach(node => {
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'pathway-node bg-sky-50 p-6 rounded-lg shadow-md hover:shadow-lg border border-sky-200 flex flex-col justify-between';
+            nodeEl.innerHTML = `<h3 class="text-xl font-semibold text-sky-700 mb-3">${node.question}</h3><p class="text-sm text-slate-600 mb-4">${node.description.substring(0,100)}...</p><button class="mt-auto bg-sky-600 text-white px-4 py-2 rounded-md hover:bg-sky-700 transition-colors self-start text-sm">Explore</button>`;
+            nodeEl.addEventListener('click', () => openModal(node));
+            pathwayNodesContainer.appendChild(nodeEl);
+        });
+
+        function openModal(node) {
+            modalTitle.textContent = node.question;
+            modalDescription.textContent = node.description;
+            modalToolsList.innerHTML = '';
+            if (node.tools && node.tools.length > 0) {
+                modalNoTools.classList.add('hidden');
+                node.tools.forEach(toolName => {
+                    const li = document.createElement('li');
+                    const toolDetail = allTools.find(t => t.name === toolName);
+                    li.textContent = toolName + (toolDetail ? ` - ${toolDetail.description.substring(0,50)}...` : '');
+                    if (toolName.includes("needed")) {
+                        li.classList.add('italic', 'text-slate-500');
+                    }
+                    modalToolsList.appendChild(li);
+                });
+            } else {
+                 modalNoTools.classList.remove('hidden');
+            }
+            modal.classList.remove('hidden');
+            setTimeout(() => { // For transition
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        closeModalButton.addEventListener('click', () => {
+            modal.classList.add('opacity-0');
+            modal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300); // Match transition duration
+        });
+        
+        modal.addEventListener('click', (e) => { // Close on backdrop click
+            if (e.target === modal) {
+                closeModalButton.click();
+            }
+        });
+
+        // Tool Hub
+        const toolCardsContainer = document.getElementById('toolCardsContainer');
+        const toolSearchInput = document.getElementById('toolSearchInput');
+
+        function displayTools(toolsToDisplay) {
+            toolCardsContainer.innerHTML = '';
+            if (toolsToDisplay.length === 0) {
+                toolCardsContainer.innerHTML = `<p class="text-slate-500 italic col-span-full text-center">No tools found matching your criteria.</p>`;
+                return;
+            }
+            toolsToDisplay.forEach(tool => {
+                const card = document.createElement('div');
+                card.className = 'tool-card bg-white p-6 rounded-lg shadow-md border border-slate-200 flex flex-col';
+                card.innerHTML = `
+                    <h3 class="text-lg font-semibold text-sky-700 mb-2">${tool.name}</h3>
+                    <p class="text-sm text-slate-600 mb-3 flex-grow">${tool.description}</p>
+                    <span class="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-full self-start">${tool.category}</span>
+                `;
+                // Add link if available (conceptual for now)
+                // if(tool.link) card.innerHTML += `<a href="${tool.link}" target="_blank" class="text-sky-600 hover:underline mt-2 self-start">Learn More</a>`;
+                toolCardsContainer.appendChild(card);
+            });
+        }
+
+        toolSearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredTools = allTools.filter(tool => 
+                tool.name.toLowerCase().includes(searchTerm) || 
+                tool.description.toLowerCase().includes(searchTerm) ||
+                tool.category.toLowerCase().includes(searchTerm)
+            );
+            displayTools(filteredTools);
+        });
+
+        // Accordion for CoCHAP Learnings
+        const accordionToggles = document.querySelectorAll('.accordion-toggle');
+        accordionToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                content.classList.toggle('hidden');
+                // Optional: close other accordions
+                // accordionToggles.forEach(otherToggle => {
+                //     if (otherToggle !== toggle) {
+                //         otherToggle.nextElementSibling.classList.add('hidden');
+                //     }
+                // });
+            });
+        });
+
+
+        // Initial display
+        displayTools(allTools);
+        // Set "Home" as active on load
+        document.querySelector('.nav-link[data-target="home"]').classList.add('active');
+        document.getElementById('home').classList.add('active');
+
+    </script>
+</body>
+</html>
